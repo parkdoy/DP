@@ -1,0 +1,15 @@
+# YOLOv8 학습을 위한 설정 파일
+
+# 학습 데이터의 루트 경로입니다.
+path: ./dataset
+
+# 훈련(train) 및 검증(val) 데이터 경로
+# images 폴더의 상대 경로를 지정합니다.
+train: train/images
+val: val/images
+
+# 클래스(Class) 정보
+# 라벨링할 때 사용한 클래스 이름과 순서가 일치해야 합니다.
+names:
+  0: companion
+  1: Mycharactor

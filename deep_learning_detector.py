@@ -122,7 +122,7 @@ def main():
         return
 
     # 1. 학습된 모델 로드
-    model_path = "yolo_project\\Game_Macro\\companion_try\\weights\\best.pt"
+    model_path = "yolo_project\\Game_Macro\\companion_try2\\weights\\best.pt"
     model = YOLO(model_path)
     
     # 2. 클래스 이름 정의
@@ -130,8 +130,8 @@ def main():
     원래의도와 다르게 yaml 파일의 names 순서가 바뀌는 문제가 발생하여
     classes.txt 파일의 순서에 맞게 직접 지정함.
     '''
-    MY_CHARACTER_CLASS = "Mycharactor"  #다크나이트 
-    ALLY_CHARACTER_CLASS = "companion"  #프리스트
+    MY_CHARACTER_CLASS = "Mycharactor"  
+    ALLY_CHARACTER_CLASS = "companion"  
 
     while True:
         try:
@@ -171,9 +171,9 @@ def main():
                        
             # 8. 결과 출력
             if my_char_locs:
-                print(f"동료 캐릭터 {len(my_char_locs)}명 인식 완료.")
+                print(f"내 캐릭터 {len(my_char_locs)}명 인식 완료.")
                 if ally_char_locs:
-                    print(f"내 캐릭터 {len(ally_char_locs)}명 인식 완료.")
+                    print(f"동료 캐릭터 {len(ally_char_locs)}명 인식 완료.")
 
             else:
                 print("캐릭터를 찾을 수 없습니다.")

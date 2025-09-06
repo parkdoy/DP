@@ -114,7 +114,7 @@ if __name__ == "__main__":
             # 지정된 영역만 캡처합니다.
             screenshot = pyautogui.screenshot(region=REGION_COORDS)
             
-            # 파일명을 'screenshot_001.png' 형식으로 저장합니다. companion / monster / Mycharactor
+            # 파일명을 'screenshot_001.png' 형식으로 저장합니다. companion / monster / Mycharactor / magatia
             file_path = os.path.join(output_folder, f"screenshot_{i+1:03d}.png")
             screenshot.save(file_path)
             

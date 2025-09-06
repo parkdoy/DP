@@ -210,8 +210,9 @@ $RECYCLE.BIN/
 .history/   
 
 # dataset 이미지 폴더
-dataset/train/
-dataset/val/
-
+yolo_project/Game_Macro/
+yolo_project/dataset/train
+yolo_project/dataset/val
+game_screenshots/
+# model weight
 *.pt
-*.yaml
