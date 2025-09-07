@@ -6,8 +6,10 @@
 # pip install ultralytics
 # pip install pynput
 # pip install tk
+# pip install pydirectinput
 
 import pyautogui
+import pydirectinput
 import cv2
 import numpy as np
 import time
@@ -15,6 +17,7 @@ from ultralytics import YOLO
 import tkinter as tk
 from pynput.mouse import Listener
 import threading
+import math # 거리 계산을 위해 math 모듈 추가
 
 # 드래그 시작점과 끝점 좌표를 저장할 전역 변수
 start_x, start_y = None, None
@@ -106,9 +109,15 @@ def capture_screen():
         return np.array(screen)
     return None
 
+def calculate_distance(p1, p2):
+    """
+    두 점 (x1, y1)와 (x2, y2)를 사용하여 유클리드 거리를 계산합니다.
+    """
+    return math.sqrt((p2[0] - p1[0])**2 + (p2[1] - p1[1])**2)
+
 def main():
     """
-    메인 실행 함수: YOLO 모델을 이용해 실시간으로 객체를 탐지합니다.
+    메인 실행 함수: YOLO 모델을 이용해 실시간으로 객체를 탐지하고 버프 로직을 실행합니다.
     """
     print("--- 딥러닝 기반 객체 인식 시작 ---")
     print("마우스 드래그로 캡처할 영역을 지정하세요.")
@@ -122,16 +131,19 @@ def main():
         return
 
     # 1. 학습된 모델 로드
-    model_path = "yolo_project\\Game_Macro\\companion_try2\\weights\\best.pt"
+    model_path = "yolo_project\\Game_Macro\\companion_try2\\weights\\best.pt"  # 사용자 모델 경로
     model = YOLO(model_path)
     
     # 2. 클래스 이름 정의
-    '''
-    원래의도와 다르게 yaml 파일의 names 순서가 바뀌는 문제가 발생하여
-    classes.txt 파일의 순서에 맞게 직접 지정함.
-    '''
-    MY_CHARACTER_CLASS = "Mycharactor"  
-    ALLY_CHARACTER_CLASS = "companion"  
+    MY_CHARACTER_CLASS = "Mycharactor"
+    ALLY_CHARACTER_CLASS = "companion"
+
+    # 버프를 제공할 최소 거리 설정 (픽셀 단위)
+    BUFF_DISTANCE_THRESHOLD = 120
+    # 버프 스킬의 재사용 대기 시간 (초 단위)
+    BUFF_COOLDOWN = 15
+    # 마지막으로 버프를 사용한 시간
+    last_buff_time = 0
 
     while True:
         try:
@@ -145,7 +157,7 @@ def main():
             
             my_char_locs = []
             ally_char_locs = []
-            monster_locs = []
+            
             display_image = np.array(screen_image)
 
             for result in results:
@@ -156,7 +168,7 @@ def main():
                     confidence = float(box.conf[0])
                     
                     # 6. 신뢰도(Confidence) 설정
-                    if confidence > 0.5:
+                    if confidence > 0.45:
                         x1, y1, x2, y2 = map(int, box.xyxy[0])
                         
                         # 7. 캐릭터 분류 및 좌표 저장
@@ -168,15 +180,45 @@ def main():
                             ally_char_locs.append(((x1 + x2) / 2, (y1 + y2) / 2))
                             cv2.rectangle(display_image, (x1, y1), (x2, y2), (255, 0, 0), 2)
                             cv2.putText(display_image, f'{class_name} {confidence:.2f}', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 0, 0), 2)
-                       
-            # 8. 결과 출력
-            if my_char_locs:
-                print(f"내 캐릭터 {len(my_char_locs)}명 인식 완료.")
-                if ally_char_locs:
-                    print(f"동료 캐릭터 {len(ally_char_locs)}명 인식 완료.")
+                    
+            # 8. 버프 제공 로직 추가
+            current_time = time.time()
+            remaining_cooldown = BUFF_COOLDOWN - (current_time - last_buff_time)
+            
+            if my_char_locs and ally_char_locs:
+                # 버프 재사용 대기 시간이 지났는지 확인
+                if remaining_cooldown <= 0:
+                    # 첫 번째로 인식된 내 캐릭터의 위치를 기준으로 삼습니다.
+                    my_char_pos = my_char_locs[0]
 
+                    for ally_pos in ally_char_locs:
+                        # 내 캐릭터와 동료 캐릭터 간의 거리를 계산합니다.
+                        distance = calculate_distance(my_char_pos, ally_pos)
+
+                        # 거리가 버프 제공 조건보다 가까운지 확인합니다.
+                        if distance < BUFF_DISTANCE_THRESHOLD:
+                            print(f"동료 캐릭터가 가까이 있습니다. 버프를 제공합니다! (거리: {distance:.2f})")
+                            
+                            # C++ 연동 또는 WinAPI를 사용한 버프 제공 키 입력
+                            print("C 키를 눌렀습니다.")
+                            pydirectinput.keyDown('c')
+                            time.sleep(0.1) # 키를 누른 상태 유지
+                            pydirectinput.keyUp('c')
+
+                            last_buff_time = current_time # 마지막으로 버프를 사용한 시간 업데이트
+                            # 버프가 한 번 제공되면 더 이상 순회할 필요 없으므로 break
+                            break
+                else:
+                    # 버프 재사용 대기 중일 때 메시지 출력
+                    formatted_time = time.strftime('%M:%S', time.gmtime(remaining_cooldown))
+                    print(f"버프 재사용 대기 중입니다. 남은 시간: {formatted_time}")
             else:
-                print("캐릭터를 찾을 수 없습니다.")
+                # 캐릭터를 찾을 수 없을 때
+                if remaining_cooldown > 0:
+                    formatted_time = time.strftime('%M:%S', time.gmtime(remaining_cooldown))
+                    print(f"동료 캐릭터를 찾을 수 없습니다. (버프 쿨타임 남은 시간: {formatted_time})")
+                else:
+                    print("동료 캐릭터를 찾을 수 없습니다.")
 
             # 9. 화면에 결과 표시
             cv2.imshow('Object Detection', display_image)
