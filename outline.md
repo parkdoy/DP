@@ -58,8 +58,9 @@
   - 파이썬에서 AI 및 게임 로직 수행
   - C++ 모듈로 커널 수준 키보드 입력 처리 (ctypes 또는 Pybind11 사용)
 
-### 운영체제별 구현
-- **Windows:** WinAPI `SendInput()` 함수 적용 실패로 pydirectinput를 사용
+### 운영체제별 구현 (실패)
+- **Windows:** WinAPI `SendInput()` 함수 적용 실패
+- pydirectinput를 사용
 
 ---
 
@@ -104,4 +105,5 @@ graph TD
 ---
 
 ### 최소 기능으로 제작한 프로젝트로 간단한 테스트 외 실사용하지 않음.
+
 
