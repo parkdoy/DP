@@ -216,3 +216,5 @@ yolo_project/dataset/val
 game_screenshots/
 # model weight
 *.pt
+# Macro3 folder
+/Game_Macro3
