@@ -53,7 +53,7 @@ if __name__ == "__main__":
     old_prefix = "screenshot"
 
     # 새로 지정할 파일 이름의 접두사 (예: 'companion')
-    new_prefix = "companion"
+    new_prefix = "newshot"
 
     rename_files(folder, old_prefix, new_prefix)
     print("\n파일 이름 변경이 완료되었습니다.")

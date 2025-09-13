@@ -165,7 +165,7 @@ def main():
                 for box in result.boxes:
                     class_id = int(box.cls[0])
                     class_name = model.names[class_id]
-                    confidence = float(box.conf[0])
+                    confidence = float(box.conf[0])                    
                     
                     # 6. 신뢰도(Confidence) 설정
                     if confidence > 0.45:
@@ -176,10 +176,12 @@ def main():
                             my_char_locs.append(((x1 + x2) / 2, (y1 + y2) / 2))
                             cv2.rectangle(display_image, (x1, y1), (x2, y2), (0, 255, 0), 2)
                             cv2.putText(display_image, f'{class_name} {confidence:.2f}', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
+                            print(f'{class_name}: {confidence:.2f}') # 디버깅용 로그
                         elif class_name == ALLY_CHARACTER_CLASS:
                             ally_char_locs.append(((x1 + x2) / 2, (y1 + y2) / 2))
                             cv2.rectangle(display_image, (x1, y1), (x2, y2), (255, 0, 0), 2)
                             cv2.putText(display_image, f'{class_name} {confidence:.2f}', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 0, 0), 2)
+                            print(f'{class_name}: {confidence:.2f}') # 디버깅용 로그
                     
             # 8. 버프 제공 로직 추가
             current_time = time.time()
@@ -198,12 +200,11 @@ def main():
                         # 거리가 버프 제공 조건보다 가까운지 확인합니다.
                         if distance < BUFF_DISTANCE_THRESHOLD:
                             print(f"동료 캐릭터가 가까이 있습니다. 버프를 제공합니다! (거리: {distance:.2f})")
-                            
-                            # C++ 연동 또는 WinAPI를 사용한 버프 제공 키 입력
-                            print("C 키를 눌렀습니다.")
-                            pydirectinput.keyDown('c')
+                            # pydirectinput를 사용하여 'D' 키 입력
+                            print("D 키를 눌렀습니다.")
+                            pydirectinput.keyDown('d')
                             time.sleep(0.1) # 키를 누른 상태 유지
-                            pydirectinput.keyUp('c')
+                            pydirectinput.keyUp('d')
 
                             last_buff_time = current_time # 마지막으로 버프를 사용한 시간 업데이트
                             # 버프가 한 번 제공되면 더 이상 순회할 필요 없으므로 break
@@ -218,7 +219,7 @@ def main():
                     formatted_time = time.strftime('%M:%S', time.gmtime(remaining_cooldown))
                     print(f"동료 캐릭터를 찾을 수 없습니다. (버프 쿨타임 남은 시간: {formatted_time})")
                 else:
-                    print("동료 캐릭터를 찾을 수 없습니다.")
+                    print(f"내 캐릭터 위치: {my_char_locs} || 동료 캐릭터 위치: {ally_char_locs}")
 
             # 9. 화면에 결과 표시
             cv2.imshow('Object Detection', display_image)
